@@ -1036,8 +1036,8 @@ def tests():
 	"""
 	# Define the test cases.
 	cases = [('hello_plain', 'Hello World'), ('hello_one', 'Hello World on one line'),
-		('hello_obfus', 'Hello World obfuscated'), ('fib', 'Fibonacci numbers'),
-		('earhart', 'Emilia Earhart quote'), ('hamlet', 'Hamlet soliloquy')]
+		('hello_obfus', 'Hello World obfuscated'), ('hello_pattern', 'Hello beautified'), 
+		('fib', 'Fibonacci numbers'), ('earhart', 'Emilia Earhart quote'), ('hamlet', 'Hamlet soliloquy')]
 	# For each test case.
 	for name, title in cases:
 		# Print a title.
