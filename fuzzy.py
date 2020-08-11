@@ -662,7 +662,7 @@ class Interpreter(object):
 			# Grab the argument.
 			arg = raw_code.pop()
 			# Parse it further if it is a function.
-			function = self.lexicon.keywords[arg]
+			function = self.lexicon.functions[arg]
 			if function is not None:
 				line.append([function])
 				self.parse_args(line[-1], raw_code)
@@ -683,7 +683,7 @@ class Lexicon(object):
 	commands: The command list for the fuzzy matching of statements. (list of str)
 	decimals: The characters indicating a fractional part. (str)
 	digits: The characters counting as digits for number conversions. (str)
-	keywords: The fuzzy matching for functions. (FuzzyDict)
+	functions: The fuzzy matching for functions. (FuzzyDict)
 	signs: The characters indicating a change in sign of a number. (str)
 	variables: The fuzzy matching for constants. (FuzzyDict)
 	tight: Distance based fuzzy matching for statements. (str)
@@ -751,11 +751,11 @@ class Lexicon(object):
 						if key in self.statements:
 							commands.append((self.float(alias), key))
 						else:
-							self.keywords[alias.strip()] = key
+							self.functions[alias.strip()] = key
 				# Set up derived attributes as soon as possible.
 				if not self.chars and self.digits and self.decimals and self.signs:
 					self.chars = self.digits + self.decimals + self.signs
-					self.keywords = FuzzyDict(self.chars)
+					self.functions = FuzzyDict(self.chars)
 					self.variables = FuzzyDict(self.chars, strict = False)
 		# Set up the bisection for tight matching.
 		commands.sort()
