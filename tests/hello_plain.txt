@@ -1,0 +1,3 @@
+set text append hello space
+set text append text world
+print text

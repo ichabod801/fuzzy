@@ -1,0 +1,12 @@
+set first ciao
+set second ciao
+set looper coda
+figure first
+figure second
+set hold second
+set second plus first second
+set first hold
+set looper subtract looper ciao
+if looper
+go hoe
+exit

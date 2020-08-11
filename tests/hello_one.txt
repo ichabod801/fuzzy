@@ -1,0 +1,1 @@
+say fuse hello fuse gap world

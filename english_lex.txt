@@ -1,0 +1,38 @@
+digits: bcdfghjklmnpqrstvw
+decimals: yz
+signs: x
+
+if: if, when, presuming, supposing
+go: go, goto, jump, hop, transport, abracadabra
+return: return, back, reverse, regress, recommence
+exit: exit, quit, escape, fin, terminus, leave
+
+assign: assign, set, allocate, correlate
+
+print: print, say, talk, write, dump, pronounce, pointificate
+calculate: calculate, compute, figure, reckon, assess
+input: input, ask, query, question, interrogate
+
+add: add, plus, total 
+subtract: subtract, take, deduct, dock, withdraw
+multiply: multiply, cross, breed, magnify
+divide: divide, split, chop, sunder, rive
+modulus: mod, modulus, remainder 
+power: power, exponent, nth, raise
+
+concatenate: concatenate, concat, combine, append, amalgamate, merge, fuse
+left: left, widdershins, counter, port
+right: right, deasil, clock, starboard
+
+and: and, together, union, join, both
+or: or, either
+not: not, never, no, negate
+
+equal: equal, same, is, identical, match
+less: less, smaller, fewer
+greater: greater, more, larger, extra
+
+true: true, correct, faithful, veracious
+false: false, wrong, fallacious, faithless
+space: space, blank, gap, empty
+period: period, stop, point, decimal, dot
