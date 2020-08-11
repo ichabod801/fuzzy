@@ -3,9 +3,6 @@ fuzzy.py
 
 An implementation of the 3.0 programming language.
 
-to do:
-clean up bozo/ace
-
 Constants:
 PARSER: A command line argument parser. (argparse.ArgumentParser)
 
@@ -22,6 +19,12 @@ tests: Run the test cases. (None)
 import argparse
 import bisect
 import collections
+
+__author__ = """Craig "Ichabod" O'Brien"""
+__copyright__ = "Copyright 2020, Craig O'Brien"
+
+__license__ = "GPL v3.0+"
+__version__ = "Ace Bozo"
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-t', '--test', help = 'run the test scripts.', action = 'store_true')
