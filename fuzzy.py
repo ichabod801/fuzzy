@@ -678,9 +678,9 @@ class Lexicon(object):
 
 	Attributes:
 	base: The numeric base for number conversions. (int)
-	breaks: The breakpoints for bisecting the commands attribute. (list of float)
+	breaks: The breakpoints for bisecting the statements attribute. (list of float)
 	chars: The characters relevant to fuzzy matching. (str)
-	commands: The command list for the fuzzy matching of statements. (list of str)
+	statements: The command list for the fuzzy matching of statements. (list of str)
 	decimals: The characters indicating a fractional part. (str)
 	digits: The characters counting as digits for number conversions. (str)
 	functions: The fuzzy matching for functions. (FuzzyDict)
@@ -689,7 +689,7 @@ class Lexicon(object):
 	tight: Distance based fuzzy matching for statements. (str)
 
 	Class Attributes:
-	statements: The statements in the language. (set of str)
+	base_statements: The statements in the parsed language. (set of str)
 
 	Methods:
 	add: Add two words. (str)
@@ -708,7 +708,7 @@ class Lexicon(object):
 	__init__
 	"""
 
-	statements = set(('assign', 'calculate', 'exit', 'go', 'if', 'print', 'return'))
+	base_statements = set(('assign', 'calculate', 'exit', 'go', 'if', 'print', 'return'))
 
 	def __init__(self, language = 'english'):
 		"""
@@ -748,7 +748,7 @@ class Lexicon(object):
 					# Otherwise treat value as aliases for a command.
 					for alias in value.split(','):
 						# Track by the type of command.
-						if key in self.statements:
+						if key in self.base_statements:
 							commands.append((self.float(alias), key))
 						else:
 							self.functions[alias.strip()] = key
@@ -759,12 +759,12 @@ class Lexicon(object):
 					self.variables = FuzzyDict(self.chars, strict = False)
 		# Set up the bisection for tight matching.
 		commands.sort()
-		self.commands = []
+		self.statements = []
 		self.breaks = []
 		for first, second in zip(commands, commands[1:]):
-			self.commands.append(first[1])
+			self.statements.append(first[1])
 			self.breaks.append(first[0] + (second[0] - first[0]) / 2)
-		self.commands.append(second[1])
+		self.statements.append(second[1])
 
 	def add(self, a, b):
 		"""
@@ -981,7 +981,7 @@ class Lexicon(object):
 		Parameters:
 		word: The word to convert to a statement. (str)
 		"""
-		return self.commands[bisect.bisect(self.breaks, self.float(word))]
+		return self.statements[bisect.bisect(self.breaks, self.float(word))]
 
 	def word(self, frac):
 		"""
