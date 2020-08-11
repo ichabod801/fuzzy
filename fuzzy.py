@@ -4,7 +4,6 @@ fuzzy.py
 An implementation of the 3.0 programming language.
 
 to do:
-clean up naming
 clean up bozo/ace
 
 Constants:
@@ -414,9 +413,9 @@ class Interpreter(object):
 		x, y = self.lexicon.num(left), self.lexicon.num(right)
 		# Return 1 or 0 depending on their equality.
 		if x == y:
-			return 'aceyz'
+			return 'ace'
 		else:
-			return 'bozob'
+			return 'bozo'
 
 	def func_false(self):
 		"""
@@ -438,9 +437,9 @@ class Interpreter(object):
 		x, y = self.lexicon.num(left), self.lexicon.num(right)
 		# Return 1 or 0 depending on their relative size.
 		if x > y:
-			return 'aceyz'
+			return 'ace'
 		else:
-			return 'bozob'
+			return 'bozo'
 
 	def func_input(self, prompt):
 		"""
@@ -480,9 +479,9 @@ class Interpreter(object):
 		x, y = self.lexicon.num(left), self.lexicon.num(right)
 		# Return 1 or 0 depending on their relative size.
 		if x < y:
-			return 'aceyz'
+			return 'ace'
 		else:
-			return 'bozob'
+			return 'bozo'
 
 	def func_modulus(self, x, y):
 		"""
@@ -523,9 +522,9 @@ class Interpreter(object):
 		value = self.evaluate(value)
 		# Reduce it's truth value to 1 or 0.
 		if value:
-			return 'aceyz'
+			return 'ace'
 		else:
-			return 'bozob'
+			return 'bozo'
 
 	def func_or(self, left, right):
 		"""
