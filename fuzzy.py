@@ -869,6 +869,7 @@ class Lexicon(object):
 			sign_count += word.count(char)
 		if sign_count % 2:
 			whole *= -1
+			numerator *= -1
 		return (whole, numerator, denominator)
 
 	def int(self, word):
