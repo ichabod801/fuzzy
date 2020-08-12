@@ -19,6 +19,7 @@ tests: Run the test cases. (None)
 import argparse
 import bisect
 import collections
+import os.path
 
 __author__ = """Craig "Ichabod" O'Brien"""
 __copyright__ = "Copyright 2020, Craig O'Brien"
@@ -28,7 +29,7 @@ __version__ = "Ace Ice"
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-t', '--test', help = 'run the test scripts.', action = 'store_true')
-PARSER.add_argument('-f', '--filename', help = 'the file to run.')
+PARSER.add_argument('-f', '--file', help = 'the path to the file to run.')
 
 class FuzzyDict(collections.UserDict):
 	"""
@@ -624,16 +625,21 @@ class Interpreter(object):
 		funcer = getattr(self, f'func_{function}')
 		return funcer(*args)
 
-	def parse(self, name):
+	def parse(self, path):
 		"""
-		Parse the raw code into statement calls and expression trees. (None)
+		Parse the raw code into statement calls and expression trees. (str)
+
+		The return value is the name the parsed program was stored under.
+
+		Parameters:
+		path: The system path to the 3.0 code file. (str)
 		"""
-		path = '{}.txt'.format(name.replace('.', '/'))
 		# Read the code into a stack.
 		with open(path) as code_file:
 			raw_code = code_file.read().lower().split()
 		raw_code.reverse()
 		# Loop through the words in the stack.
+		name = os.path.basename(path)
 		self.programs[name] = []
 		while raw_code:
 			word = raw_code.pop()
@@ -648,6 +654,7 @@ class Interpreter(object):
 				line = ['exit']
 			# Store the full line.
 			self.programs[name].append(line)
+		return name
 
 	def parse_args(self, line, raw_code):
 		"""
@@ -830,17 +837,17 @@ class Lexicon(object):
 			return chars
 		
 
-def run_file(filename):
+def run_file(path):
 	"""
 	Run a single program. (None)
 
 	Paramters:
-	filename: The file to run. (str)
+	path: The system path to the file to run. (str)
 	"""
 	inter = Interpreter()
-	inter.parse(filename)
+	name = inter.parse(path)
 	try:
-		inter.execute(filename)
+		inter.execute(name)
 	except KeyboardInterrupt:
 		pass
 
@@ -858,13 +865,13 @@ def tests():
 		print(f'\n-------------------\n\n{title}')
 		# Print the program.
 		inter = Interpreter()
-		inter.parse(f'tests.{name}')
+		name = inter.parse(f'tests/{name}.txt')
 		print()
-		print(inter.programs[f'tests.{name}'])
+		print(inter.programs[name])
 		print()
 		# Run the program.
 		try:
-			inter.execute(f'tests.{name}')
+			inter.execute(name)
 		except KeyboardInterrupt:
 			pass
 		print()
@@ -873,5 +880,5 @@ if __name__ == '__main__':
 	args = PARSER.parse_args()
 	if args.test:
 		tests()
-	elif args.filename:
-		run_file(args.filename)
+	elif args.file:
+		run_file(args.file)
