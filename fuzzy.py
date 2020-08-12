@@ -24,7 +24,7 @@ __author__ = """Craig "Ichabod" O'Brien"""
 __copyright__ = "Copyright 2020, Craig O'Brien"
 
 __license__ = "GPL v3.0+"
-__version__ = "Ace Bozo"
+__version__ = "Ace Ice"
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument('-t', '--test', help = 'run the test scripts.', action = 'store_true')
@@ -276,7 +276,7 @@ class Interpreter(object):
 		#print('go', target, end = ' ')
 		# Get the target and force it within the program.
 		target = self.evaluate(target)
-		target = (self.lexicon.int(target) - 1) % len(self.current_program)
+		target = int(self.lexicon.num(target) - 1) % len(self.current_program)
 		# Store and make the jump.
 		self.returns.append(self.pointer)
 		self.pointer = target
@@ -291,7 +291,7 @@ class Interpreter(object):
 		value: The value checked for truth. (str)
 		"""
 		value = self.evaluate(value)
-		if not self.lexicon.float(value):
+		if not self.lexicon.num(value):
 			self.pointer += 1
 
 	def exec_print(self, value):
@@ -347,7 +347,7 @@ class Interpreter(object):
 		x = self.evaluate(x)
 		y = self.evaluate(y)
 		# Add the results.
-		return self.lexicon.add(x, y)
+		return self.lexicon.word(self.lexicon.num(x) + self.lexicon.num(y))
 
 	def func_and(self, left, right):
 		"""
@@ -400,7 +400,7 @@ class Interpreter(object):
 		left = self.evaluate(left)
 		right = self.evaluate(right)
 		# Return the quotient.
-		return self.lexicon.divide(left, right)
+		return self.lexicon.word(self.lexicon.num(x) / self.lexicon.num(y))
 
 	def func_equal(self, left, right):
 		"""
@@ -498,7 +498,7 @@ class Interpreter(object):
 		x = self.evaluate(x)
 		y = self.evaluate(y)
 		# Get the modulus of the results.
-		return self.lexicon.modulus(x, y)
+		return self.lexicon.word(self.lexicon.num(x) % self.lexicon.num(y))
 
 	def func_multiply(self, x, y):
 		"""
@@ -512,7 +512,7 @@ class Interpreter(object):
 		x = self.evaluate(x)
 		y = self.evaluate(y)
 		# Multiply the results.
-		return self.lexicon.multiply(x, y)
+		return self.lexicon.word(self.lexicon.num(x) * self.lexicon.num(y))
 
 	def func_not(self, value):
 		"""
@@ -570,7 +570,7 @@ class Interpreter(object):
 		x = self.evaluate(x)
 		y = self.evaluate(y)
 		# Get the difference.
-		return self.lexicon.power(x, y)
+		return self.lexicon.word(self.lexicon.num(x) ** self.lexicon.num(y))
 
 	def func_right(self, text, length):
 		"""
@@ -605,7 +605,7 @@ class Interpreter(object):
 		x = self.evaluate(x)
 		y = self.evaluate(y)
 		# Get the difference.
-		return self.lexicon.subtract(x, y)
+		return self.lexicon.word(self.lexicon.num(x) - self.lexicon.num(y))
 
 	def func_true(self):
 		"""
@@ -751,7 +751,7 @@ class Lexicon(object):
 					for alias in value.split(','):
 						# Track by the type of command.
 						if key in self.base_statements:
-							commands.append((self.float(alias), key))
+							commands.append((self.num(alias), key))
 						else:
 							self.functions[alias.strip()] = key
 				# Set up derived attributes as soon as possible.
@@ -768,84 +768,9 @@ class Lexicon(object):
 			self.breaks.append(first[0] + (second[0] - first[0]) / 2)
 		self.statements.append(second[1])
 
-	def add(self, a, b):
+	def num(self, word):
 		"""
-		Add two words. (str)
-
-		Parameters:
-		a: The first word to add. (str)
-		b: The second word to add. (str)
-		"""
-		# Convert to fractions with matching denominators.
-		x, y = self.fraction(a), self.fraction(b)
-		x, y = self.conform(x, y)
-		# Add.
-		total = (x[0] + y[0], x[1] + y[1], x[2])
-		# Return as a word.
-		return self.word(total)
-
-	def conform(self, x, y):
-		"""
-		Make sure two fractions have the same denominator. (tuple)
-
-		If either denominator is not a power of self.base, this will be an infinite
-		loop.
-
-		Parameters:
-		x: The first fraction to conform. (tuple of int)
-		y: The second fraction to conform. (tuple of int)
-		"""
-		# Fix the first one.
-		while x[2] < y[2]:
-			x = (x[0], x[1] * self.base, x[2] * self.base)
-		# Fix the second one.
-		while y[2] < x[2]:
-			y = (y[0], y[1] * self.base, y[2] * self.base)
-		return x, y
-
-	def divide(self, a, b):
-		"""
-		Divide one word by another. (str)
-
-		Parameters:
-		a: The first word to add. (str)
-		b: The second word to add. (str)
-		"""
-		# Convert to fractions with matching denominators.
-		x, y = self.fraction(a), self.fraction(b)
-		x, y = self.conform(x, y)
-		# Fuzzy divide.
-		# Get the whole part and a (possibly fractional) numerator.
-		numerator = (x[0] * x[2] + x[1]) / (y[0] * y[2] + y[1])
-		if numerator > x[2]:
-			whole, numerator = divmod(numerator, x[2])
-		else:
-			whole = 0
-		# Estimate fractional numerators to two digits.
-		if abs(numerator - int(numerator)) > 1 / self.base ** 2:
-			quotient = (whole, int(numerator) * self.base ** 2, x[2] * self.base ** 2)
-		else:
-			quotient = (whole, int(numerator), x[2])
-		# Return as a word.
-		return self.word(quotient)
-
-	def float(self, word):
-		"""
-		Return a float point version of a word. (float)
-
-		Parameters:
-		word: The word to convert to a floating point number. (str)
-		"""
-		whole, numerator, denominator = self.fraction(word)
-		return whole + numerator / denominator
-
-	def fraction(self, word):
-		"""
-		Return a fraction version of a word. (tuple of int)
-
-		The tuple returned is the whole part, the integer, and the denominator. So 5.6
-		might be returned as (5, 3, 5). The fraction is not guaranteed to be 
-		simplified.
+		Return a numeric version of a word. (int or float)
 
 		Parameters:
 		word: The word to convert to a fraction. (str)
@@ -853,6 +778,7 @@ class Lexicon(object):
 		whole = 0
 		numerator = 0
 		denominator = 1
+		sign = 1
 		whole_mode = True
 		for char in word.lower():
 			try:
@@ -868,114 +794,11 @@ class Lexicon(object):
 		for char in self.signs:
 			sign_count += word.count(char)
 		if sign_count % 2:
-			whole *= -1
-			numerator *= -1
-		return (whole, numerator, denominator)
-
-	def int(self, word):
-		"""
-		Return an integer version of a word. (int)
-
-		Parameters:
-		word: The word to convert to an integer. (str)
-		"""
-		whole = 0
-		for char in word.lower():
-			try:
-				whole = whole * self.base + self.digits.index(char)
-			except ValueError:
-				if char in self.decimals:
-					break
-		sign_count = 0
-		for char in self.signs:
-			sign_count += word.count(char)
-		if sign_count % 2:
-			whole *= -1
-		return whole
-
-	def num(self, word):
-		"""
-		Return an integer or float version of a word as appropriate. (number)
-
-		Parameters:
-		word: The word to convert to a number. (str)
-		"""
-		whole, numerator, denominator = self.fraction(word)
+			sign = -1
 		if numerator:
-			return whole + numerator / denominator
+			return (whole + numerator / denominator) * sign
 		else:
-			return whole
-
-	def mod(self, a, b):
-		"""
-		Get the remainder of one word divided by another. (str)
-
-		Paramters:
-		a: The dividend. (str)
-		b: The divisor. (str)
-		"""
-		x, y = self.float(a), self.int(b)
-		remainder = (x[0] % y, x[1], x[2])
-		return self.word(total)
-
-	def multiply(self, a, b):
-		"""
-		Get the product of two words. (str)
-
-		Paramters:
-		a: The first number to multiply. (str)
-		b: The second number to multiply. (str)
-		"""
-		# Calculate the numerator and denominator.
-		x, y = self.fraction(a), self.fraction(b)
-		numerator = (x[0] * x[2] + x[1]) * (y[0] * y[2] + y[1])
-		denominator = x[1] * y[1]
-		# Check for values greater than one.
-		if numerator > denominator:
-			whole, numerator = divmod(numerator, denominator)
-		else:
-			whole = 0
-		# Return the value as a word.
-		total = (whole, numerator, denominator)
-		return self.word(total)
-
-	def power(self, a, b):
-		"""
-		Get one word raised to another. (str)
-
-		Parameters:
-		a: The number to be raised. (str)
-		b: The number to be raised to. (str)
-		"""
-		# Calculate the denominator.
-		x, y = self.fraction(a), self.fraction(b)
-		denominator = max(x[2], y[2])
-		# Calculate the whole and numerator from the float result.
-		result = (x[0] + x[1] / x[2]) ** (y[0] + y[1] / y[2])
-		whole = int(result)
-		numerator = (result - int(result)) * denominator
-		# Increase the denominator for fractional numerators.
-		if abs(int(numerator) - numerator) > 1 / self.base ** 2:
-			numerator = int(numerator * self.base ** 2)
-			denominator *= self.base ** 2
-		# Retuirn the value as a word.
-		result = (whole, numerator, denominator)
-		return self.word(result)
-
-	def subtract(self, a, b):
-		"""
-		Get the difference of two words. (str)
-
-		Paramters:
-		a: The number to subtract from. (str)
-		b: The number to subtract. (str)
-		"""
-		# Convert to fractions with the same base.
-		x, y = self.fraction(a), self.fraction(b)
-		x, y = self.conform(x, y)
-		# Subtract and return as a word.
-		total = (x[0] - y[0], x[1] - y[1], x[2])
-		return self.word(total)
+			return whole * sign
 
 	def tight(self, word):
 		"""
@@ -984,38 +807,28 @@ class Lexicon(object):
 		Parameters:
 		word: The word to convert to a statement. (str)
 		"""
-		return self.statements[bisect.bisect(self.breaks, self.float(word))]
+		return self.statements[bisect.bisect(self.breaks, self.num(word))]
 
-	def word(self, frac):
-		"""
-		Convert a fraction into a word. (str)
-
-		Parameters:
-		frac: A number expressed as a fraction. (tuple of int)
-		"""
-		#print(f'<word check {frac}>')
-		# Prep for the calculation.
+	def word(self, num):
+		whole_part = abs(int(num))
 		chars = ''
-		whole, numerator, denominator = frac
-		# Convert the whole part to a number.
-		while whole:
-			whole, index = divmod(whole, self.base)
+		while whole_part:
+			whole_part, index = divmod(whole_part, self.base)
 			chars = self.digits[index] + chars
-		# Convert the fractional part to a number.
-		if numerator:
-			chars += self.decimals[0]
-			# Get the leading zeros for the decimal part.
-			while numerator * self.base < denominator:
-				chars += self.digits[0]
-				denominator //= self.base
-			# Calcuate the rest of the numerator
-			right_chars = ''
-			while numerator:
-				numerator, index = divmod(numerator, self.base)
-				right_chars = self.digits[index] + right_chars
-			# Finish the word.
-			chars = chars + right_chars
-		return chars
+		if isinstance(num, float):
+			frac_part = abs(num - int(num))
+			frac_chars = ''
+			while frac_part > 1 / self.base ** 5 and len(frac_chars) < 10:
+				product = frac_part * 18
+				frac_chars += self.digits[int(product)]
+				frac_part = product - int(product)
+			if frac_chars:
+				chars = chars + self.decimals[0] + frac_chars
+		if num < 0:
+			return chars + self.signs[0]
+		else:
+			return chars
+		
 
 def run_file(filename):
 	"""
