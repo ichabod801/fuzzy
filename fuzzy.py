@@ -701,17 +701,9 @@ class Lexicon(object):
 	base_statements: The statements in the parsed language. (set of str)
 
 	Methods:
-	add: Add two words. (str)
-	conform: Make sure two fractions have the same denominator. (tuple)
-	divide: Divide one word by another. (str)
-	float: Return a float point version of a word. (float)
-	fraction: Return a fraction version of a word. (tuple of int)
-	int: Return an integer version of a word. (int)
-	num: Return an integer or float version of a word as appropriate. (number)
-	mod: Get the remainder of one word divided by another. (str)
-	multiply: Get the product of two words. (str)
-	subtract: Get the difference of two words. (str)
-	word: Convert a fraction into a word. (str)
+	num: Convert a word to a number. (int or float)
+	tight: Distance based fuzzy matching for statements. (str)
+	word: Convert a number into a word. (str)
 
 	Overridden Methods:
 	__init__
@@ -777,31 +769,37 @@ class Lexicon(object):
 
 	def num(self, word):
 		"""
-		Return a numeric version of a word. (int or float)
+		Convert a word to a number. (int or float)
 
 		Parameters:
-		word: The word to convert to a fraction. (str)
+		word: The word to convert. (str)
 		"""
+		# Set the defaults
 		whole = 0
 		numerator = 0
 		denominator = 1
 		sign = 1
+		# Loop through the characters in the word.
 		whole_mode = True
 		for char in word.lower():
 			try:
+				# Add digits to the integer or fractional parts as appropriate.
 				if whole_mode:
 					whole = whole * self.base + self.digits.index(char)
 				else:
 					numerator = numerator * self.base + self.digits.index(char)
 					denominator *= self.base
 			except ValueError:
+				# Check for the switch from integer to fractional parts.
 				if char in self.decimals:
 					whole_mode = False
+		# Check for negative numbers.
 		sign_count = 0
 		for char in self.signs:
 			sign_count += word.count(char)
 		if sign_count % 2:
 			sign = -1
+		# Return as int or float, depending on existence of a fractional part.
 		if numerator:
 			return (whole + numerator / denominator) * sign
 		else:
@@ -817,20 +815,31 @@ class Lexicon(object):
 		return self.statements[bisect.bisect(self.breaks, self.num(word))]
 
 	def word(self, num):
+		"""
+		Convert a numbet to a word. (str)
+
+		Parameters:
+		num: The word to convert. (int or float)
+		"""
+		# Convert the integer portion. 
 		whole_part = abs(int(num))
 		chars = ''
 		while whole_part:
 			whole_part, index = divmod(whole_part, self.base)
 			chars = self.digits[index] + chars
+		# Check for a fractional part.
 		if isinstance(num, float):
 			frac_part = abs(num - int(num))
 			frac_chars = ''
+			# Convert the factional part up to a point.
 			while frac_part > 1 / self.base ** 5 and len(frac_chars) < 10:
 				product = frac_part * 18
 				frac_chars += self.digits[int(product)]
 				frac_part = product - int(product)
+			# Only add the fractional part if it's non-zero
 			if frac_chars:
 				chars = chars + self.decimals[0] + frac_chars
+		# Check for adding a sign.
 		if num < 0:
 			return chars + self.signs[0]
 		else:
